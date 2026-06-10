@@ -9,12 +9,41 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import java.util.List;
+
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
     private JwtFilter jwtFilter;
+    @Bean
+public CorsConfigurationSource corsConfigurationSource() {
+
+    CorsConfiguration configuration =
+            new CorsConfiguration();
+
+    configuration.setAllowedOrigins(
+            List.of("http://localhost:5173"));
+
+    configuration.setAllowedMethods(
+            List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+    configuration.setAllowedHeaders(
+            List.of("*"));
+
+    UrlBasedCorsConfigurationSource source =
+            new UrlBasedCorsConfigurationSource();
+
+    source.registerCorsConfiguration(
+            "/**",
+            configuration);
+
+    return source;
+}
     @Bean
 public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
@@ -24,25 +53,27 @@ public SecurityFilterChain securityFilterChain(
         HttpSecurity http)
         throws Exception {
 
-   http
-    .csrf(csrf -> csrf.disable())
+    http
+        .csrf(csrf -> csrf.disable())
 
-    .authorizeHttpRequests(auth -> auth
+        .cors(cors -> {})
 
+        .authorizeHttpRequests(auth -> auth
             .requestMatchers(
-        "/auth/login",
-        "/users"
+    "/auth/login",
+    "/auth/signup"
 )
 .permitAll()
 
             .anyRequest()
             .authenticated()
-    )
+        )
 
-    .addFilterBefore(
+        .addFilterBefore(
             jwtFilter,
             UsernamePasswordAuthenticationFilter.class
-    );
+        );
+
     return http.build();
 }
 }

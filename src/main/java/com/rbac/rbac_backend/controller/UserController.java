@@ -2,7 +2,8 @@ package com.rbac.rbac_backend.controller;
 
 import com.rbac.rbac_backend.entity.User;
 import com.rbac.rbac_backend.service.UserService;
-
+import jakarta.validation.Valid;
+import com.rbac.rbac_backend.dto.CreateUserRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +21,12 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.save(user);
-    }
+@PreAuthorize("hasAuthority('CREATE_USER')")
+public User createUser(
+        @RequestBody CreateUserRequest request) {
+
+    return userService.createUser(request);
+}
 
     @GetMapping
     @PreAuthorize("hasAuthority('READ_USER')")
